@@ -1,167 +1,113 @@
-// app/page.tsx - This is a Next.js Async Server Component (default behavior)
-// Data fetching occurs securely on the server before the page is rendered.
+"use client"
 
-import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { Property } from "@/lib/types";
-import Link from "next/link";
+import { useAuth } from "@/lib/auth-context"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { ArrowRight, Users, TrendingUp } from "lucide-react"
+// Changed from default import to named import and removed redundant Home import
 
-// --- 1. Server-Side Data Fetching Function ---
-/**
- * Fetches all approved and available properties from the Supabase database.
- * @returns An array of Property objects or an empty array on error.
- */
-async function getAvailableProperties(): Promise<Property[]> {
-  // Initialize the secure server-side client
-  const supabase = createServerSupabaseClient();
+export default function Home() {
+  const { isAuthenticated, user } = useAuth()
+  const router = useRouter()
 
-  // Query the 'properties' table from your schema
-  const { data, error } = await supabase
-    .from("properties")
-    .select("*") // Selects all columns defined in the Property type
-    .eq("approved", true) // Filter: only show properties approved by an admin
-    .eq("status", "available") // Filter: only show properties marked as available
-    .order("created_at", { ascending: false }) // Show newest properties first
-    .limit(12); // Limit the results for performance
-
-  if (error) {
-    // Log the error securely on the server and return an empty array
-    console.error("Error fetching available properties:", error.message);
-    return [];
-  }
-
-  // Cast and return the fetched data
-  return data as Property[];
-}
-
-// --- 2. Main Page Component (Async Server Component) ---
-export default async function Home() {
-  // Await the data fetch. This pauses rendering until data is ready.
-  const properties = await getAvailableProperties();
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (user?.role === "agent") {
+        router.push("/agent/dashboard")
+      } else {
+        router.push("/properties")
+      }
+    }
+  }, [isAuthenticated, user, router])
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      {/* --- Header/Hero Section (Placeholder) --- */}
-      <div className="bg-white shadow-md p-10 mb-8">
-        <div className="container mx-auto">
-          <h1 className="text-4xl font-extrabold text-indigo-700">
-            Find Your Dream Home
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Explore the newest real estate listings managed by our certified
-            agents.
-          </p>
+    <div className="min-h-screen bg-background">
+      <nav className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <ArrowRight className="w-5 h-5 text-primary-foreground" /> {/* Updated to use ArrowRight icon directly */}
+            </div>
+            <span className="text-xl font-semibold text-foreground">REMS</span>
+          </div>
+          <div className="flex gap-3">
+            <Link href="/login">
+              <Button variant="ghost" className="text-foreground hover:bg-secondary">
+                Login
+              </Button>
+            </Link>
+            <Link href="/register">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">Sign Up</Button>
+            </Link>
+          </div>
         </div>
-      </div>
+      </nav>
 
-      {/* --- Property Grid Section --- */}
-      <div className="container mx-auto p-4">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">
-          Available Listings ({properties.length} found)
-        </h2>
-
-        {properties.length === 0 ? (
-          <div className="text-center p-12 bg-white rounded-lg shadow-inner">
-            <p className="text-xl text-gray-500">
-              No available properties found at this time.
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="py-20 space-y-12">
+          <div className="space-y-6 max-w-3xl">
+            <div className="inline-block">
+              <span className="px-3 py-1 bg-secondary text-primary text-sm font-medium rounded-full">
+                Welcome to REMS
+              </span>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-bold text-foreground leading-tight">Find Your Perfect Property</h1>
+            <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
+              Discover amazing properties and connect with experienced real estate agents. Whether you're buying,
+              selling, or renting, we've got you covered.
             </p>
-            <p className="text-sm text-gray-400 mt-2">
-              Check back later or ensure your database has records.
-            </p>
+            <div className="flex gap-4 pt-4">
+              <Link href="/properties">
+                <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
+                  Browse Properties
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+              <Link href="/register">
+                <Button size="lg" variant="outline" className="border-border hover:bg-secondary bg-transparent">
+                  Become an Agent
+                </Button>
+              </Link>
+            </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {/* Map over the fetched data */}
-            {properties.map((property) => (
-              <div
-                key={property.id}
-                className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]"
-              >
-                {/* Image Placeholder */}
-                <div className="h-48 w-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-medium">
-                  Property Image Placeholder
-                </div>
 
-                <div className="p-4">
-                  {/* Property Title and Price */}
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">
-                    {property.title}
-                  </h3>
-                  {/* Use toLocaleString for proper currency formatting */}
-                  <p className="text-2xl font-bold text-green-600 my-2">
-                    ${property.price.toLocaleString("en-US")}
-                  </p>
-
-                  {/* Key Features */}
-                  <div className="flex items-center space-x-4 text-sm text-gray-600 mt-3 border-t pt-3">
-                    <div className="flex items-center">
-                      {/* Icon for Beds (Lucide-React might be used here, but using SVG placeholder) */}
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 mr-1 text-indigo-500"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M10 2a1 1 0 00-1 1v1h2V3a1 1 0 00-1-1zm6 8a6 6 0 11-12 0 6 6 0 0112 0z" />
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-10a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V8z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      {property.bedrooms} Beds
-                    </div>
-                    <div className="flex items-center">
-                      {/* Icon for Baths */}
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 mr-1 text-indigo-500"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M9 2a1 1 0 000 2v1h2V4a1 1 0 00-2 0V2z" />
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-14a6 6 0 100 12 6 6 0 000-12zm-3 5a1 1 0 000 2h6a1 1 0 100-2H7z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      {property.bathrooms} Baths
-                    </div>
-                    <div className="flex items-center">
-                      {/* Icon for Square Footage */}
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 mr-1 text-indigo-500"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                        <path
-                          fillRule="evenodd"
-                          d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      {property.square_feet.toLocaleString("en-US")} sq ft
-                    </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12">
+            {[
+              {
+                icon: ArrowRight,
+                title: "Browse Properties",
+                description: "Explore thousands of listings with advanced filters and detailed information.",
+              },
+              {
+                icon: Users,
+                title: "Connect with Agents",
+                description: "Get in touch with experienced professionals who know the market.",
+              },
+              {
+                icon: TrendingUp,
+                title: "Track Your Leads",
+                description: "Agents can manage properties and leads all in one place.",
+              },
+            ].map((feature, idx) => {
+              const Icon = feature.icon
+              return (
+                <div
+                  key={idx}
+                  className="p-6 rounded-xl border border-border/50 bg-card hover:border-primary/30 hover:shadow-lg transition-all duration-300"
+                >
+                  <div className="w-12 h-12 bg-secondary rounded-lg flex items-center justify-center mb-4">
+                    <Icon className="w-6 h-6 text-primary" />
                   </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
                 </div>
-
-                {/* Action Button */}
-                <div className="p-4 border-t">
-                  {/* Link to a detail page for the property */}
-                  <Link
-                    href={`/properties/${property.id}`}
-                    className="block text-center bg-indigo-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
-                  >
-                    View Property
-                  </Link>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
-        )}
-      </div>
-    </main>
-  );
+        </div>
+      </main>
+    </div>
+  )
 }
