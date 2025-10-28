@@ -1,11 +1,9 @@
-/* app/globals.css */
-
+@import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Standard theme colors (using oklch) */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -40,7 +38,7 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  /* Custom Color tokens (used by your manual utility classes) */
+  /* Color tokens */
   --color-primary: #0f766e;
   --color-primary-light: #14b8a6;
   --color-primary-dark: #0d5a52;
@@ -102,42 +100,8 @@
   --transition-slow: 300ms ease-in-out;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
-}
-
 @theme inline {
+  /* optional: --font-sans, --font-serif, --font-mono if they are applied in the layout.tsx */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -176,42 +140,15 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* 🛠️ FIX 1: Overrides the old body style to use theme-aware colors */
 @layer base {
   * {
-    border-color: var(--border);
-    outline-color: var(--ring);
+    @apply border-border outline-ring/50;
   }
   body {
-    background-color: var(--background);
-    color: var(--foreground);
+    @apply bg-background text-foreground;
   }
 }
 
-/* 🛠️ FIX 2: Explicitly set input text and placeholder color using theme variables */
-input, 
-textarea {
-  /* This forces the typed text to use the theme-aware foreground color, 
-     which is DARK in the light theme. */
-  color: var(--foreground) !important; 
-  
-  /* Ensure the background of the Input is theme-aware and white in light mode */
-  background-color: var(--background) !important; 
-}
-
-input::placeholder,
-textarea::placeholder {
-  /* Forces the placeholder to a visible dark gray */
-  color: var(--muted-foreground) !important; 
-  opacity: 1 !important; 
-}
-
-
-/* ---------------------------------------------------- */
-/* --- CUSTOM UTILITY & BASE STYLES --- */
-/* ---------------------------------------------------- */
-
-/* Reset and HTML Base */
 * {
   margin: 0;
   padding: 0;
@@ -225,9 +162,12 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 🛑 Removed legacy body style that was overriding theme color 🛑 */
-/* body { background-color: var(--color-background); color: var(--color-text); ... } */
-
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+}
 
 /* Typography */
 h1 {
@@ -272,7 +212,7 @@ a:hover {
   color: var(--color-primary-dark);
 }
 
-/* Utility classes (Used in your JSX component) */
+/* Utility classes */
 .min-h-screen {
   min-height: 100vh;
 }
@@ -324,16 +264,9 @@ a:hover {
 .text-success {
   color: var(--color-success);
 }
-/* FIX: Use theme-aware color for subtitle text visibility */
 .text-teal-100 {
-  color: var(--color-text-light); 
-  opacity: 0.7; 
+  color: rgba(20, 184, 166, 0.3);
 }
-.dark .text-teal-100 {
-  color: var(--foreground); 
-  opacity: 0.7;
-}
-
 .text-2xl {
   font-size: var(--font-size-2xl);
 }
@@ -826,32 +759,30 @@ a:hover {
 }
 
 /* ---------------------------------------------------- */
-/* --- DARK MODE TOGGLE STYLING FIXES --- */
+/* --- FIXES FOR TEXT AND BUTTON VISIBILITY --- */
 /* ---------------------------------------------------- */
 
-.dropdown-menu-content {
-    background-color: var(--card);
-    color: var(--foreground);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
+/* Fix for input and textarea text visibility */
+input, 
+textarea {
+  color: var(--color-text) !important;
 }
 
-.dropdown-menu-item {
-    padding: var(--spacing-sm) var(--spacing-md);
-    cursor: pointer;
-    transition: background-color var(--transition-fast);
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-light) !important;
+  opacity: 0.6 !important;
 }
 
-.dropdown-menu-item:hover,
-.dropdown-menu-item:focus {
-    background-color: var(--primary);
-    color: var(--primary-foreground);
-    outline: none;
+/* Fix for button visibility */
+button.bg-primary,
+a button.bg-primary {
+  background-color: var(--color-primary) !important;
+  color: var(--color-white) !important;
 }
 
-.theme-toggle-button {
-    background-color: var(--background);
-    color: var(--foreground);
-    border-color: var(--border);
+button.bg-primary:hover,
+a button.bg-primary:hover {
+  background-color: var(--color-primary-dark) !important;
+  color: var(--color-white) !important;
 }
