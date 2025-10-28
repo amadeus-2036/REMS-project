@@ -2,7 +2,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, MapPin, Home, Users, TrendingUp } from "lucide-react"
+import { Search,Home, Users, TrendingUp } from "lucide-react"
 
 export default function HomePage() {
   return (
@@ -39,7 +39,6 @@ export default function HomePage() {
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
             <div className="flex gap-2">
               <div className="flex-1 relative">
-                <MapPin className="absolute left-3 top-3 w-5 h-5 text-text-light" />
                 <Input placeholder="Enter location, city, or address" className="pl-10 h-12 border-border" />
               </div>
               <Button className="bg-primary hover:bg-primary-dark text-white h-12 px-8">
